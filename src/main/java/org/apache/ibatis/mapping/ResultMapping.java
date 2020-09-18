@@ -27,14 +27,20 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * 对应ResultMap中的一个元素
  */
 public class ResultMapping {
 
   private Configuration configuration;
+  // 实体属性名
   private String property;
+  // 数据库字段名
   private String column;
+  // JDK 类型
   private Class<?> javaType;
+  // JDBC 类型
   private JdbcType jdbcType;
+  // 类型转换器
   private TypeHandler<?> typeHandler;
   private String nestedResultMapId;
   private String nestedQueryId;

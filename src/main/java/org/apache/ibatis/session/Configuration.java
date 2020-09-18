@@ -101,40 +101,63 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 public class Configuration {
 
   protected Environment environment;
-
+  // 允许在嵌套语句中使用分页（RowBounds）。如果允许，设置 false
   protected boolean safeRowBoundsEnabled;
+  // 允许在嵌套语句中使用分页（ResultHandler）。如果允许，设置false
   protected boolean safeResultHandlerEnabled = true;
+  // 是否开启自动驼峰命名规则映射
   protected boolean mapUnderscoreToCamelCase;
+  // 当启用时，对任意延迟属性的调用会使带有延迟加载属性的对象完整加载；反之，每种属性将会按需加载
   protected boolean aggressiveLazyLoading;
+  // 是否允许单一语句返回多结果集（需要兼容驱动）
   protected boolean multipleResultSetsEnabled = true;
+  // 允许JDBC 支持自动生成主键，需要驱动兼容。
   protected boolean useGeneratedKeys;
+  // 使用列标签代替列名
   protected boolean useColumnLabel = true;
+  // 缓存的全局开关
   protected boolean cacheEnabled = true;
+  // 指定当结果集中值为 null 时，是否调用映射对象的 setter（map 对象时为 put）方法，
+  // 这对于 Map.kcySet() 依赖或 null 值初始化时是有用的。
+  // 注意，基本类型（int、boolean 等）不能设置成 null
   protected boolean callSettersOnNulls;
+  // 允许用方法参数中声明的实际名称引用参数
   protected boolean useActualParamName = true;
   protected boolean returnInstanceForEmptyRow;
 
+  // 指定 MyBatis 增加到日志名称的前缀
   protected String logPrefix;
   protected Class<? extends Log> logImpl;
+  // 指定 VFS 的实现类
   protected Class<? extends VFS> vfsImpl;
+  //
   protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
+  // 当没有为参数提供特定的 JDBC 类型时，为空值指定 JDBC 类型
   protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
+  // 指定哪个对象的方法触发一次延迟加载
   protected Set<String> lazyLoadTriggerMethods = new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString"));
+  // 设置超时时间，它决定驱动等待数据库响应的秒数
   protected Integer defaultStatementTimeout;
+  // 设置数据库驱动程序默认返回的条数限制，此参数可以重新设置
   protected Integer defaultFetchSize;
   protected ResultSetType defaultResultSetType;
+  // 配置默认的执行器
   protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
+  //指定 MyBatis 应如何自动映射列到字段或属性。
   protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
+  // 指定自动映射当中未知列（或未知属性类型）时的行为
   protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
 
   protected Properties variables = new Properties();
   protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
   protected ObjectFactory objectFactory = new DefaultObjectFactory();
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
-
+  // 延迟加载的全局开关
   protected boolean lazyLoadingEnabled = false;
+  // 指定 MyBatis 创建具有延迟加栽能力的对象所用到的代理工具
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
+  // 用来区分项目中存在多种数据库,SQL 对于的数据库
   protected String databaseId;
   /**
    * Configuration factory class.
@@ -145,6 +168,7 @@ public class Configuration {
   protected Class<?> configurationFactory;
 
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
+  // 插件链路
   protected final InterceptorChain interceptorChain = new InterceptorChain();
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
@@ -160,7 +184,7 @@ public class Configuration {
 
   protected final Set<String> loadedResources = new HashSet<>();
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
-
+  // 解析的xml中SQL有顺序,需要依赖下面标签的标签暂时无法解析,先放到集合中
   protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
   protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
@@ -541,6 +565,10 @@ public class Configuration {
     return languageRegistry;
   }
 
+  /**
+   * 指定动态 SQL 生成的默认语言
+   * @param driver
+   */
   public void setDefaultScriptingLanguage(Class<? extends LanguageDriver> driver) {
     if (driver == null) {
       driver = XMLLanguageDriver.class;

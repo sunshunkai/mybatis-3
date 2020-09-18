@@ -17,11 +17,16 @@ package org.apache.ibatis.parsing;
 
 /**
  * @author Clinton Begin
+ * 标记解析器
+ * 如 将 ${name} 替换
  */
 public class GenericTokenParser {
 
+  // 左字符串
   private final String openToken;
+  // 右字符串
   private final String closeToken;
+  // 替换规则
   private final TokenHandler handler;
 
   public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {

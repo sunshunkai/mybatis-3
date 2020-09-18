@@ -19,8 +19,10 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ * 在节点中相当于树枝，还要继续往下解析
  */
 public class MixedSqlNode implements SqlNode {
+  // 记录sql节点中的所有SQL片段
   private final List<SqlNode> contents;
 
   public MixedSqlNode(List<SqlNode> contents) {

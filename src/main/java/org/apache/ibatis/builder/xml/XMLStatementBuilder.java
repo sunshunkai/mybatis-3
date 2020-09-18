@@ -35,6 +35,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * 处理SQL
  */
 public class XMLStatementBuilder extends BaseBuilder {
 
@@ -61,17 +62,22 @@ public class XMLStatementBuilder extends BaseBuilder {
       return;
     }
 
+    // 对应的SQL类型select、delete等
     String nodeName = context.getNode().getNodeName();
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
+
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+    // 如果没有刷新缓存,则除了 SELECT 都刷新缓存
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
+    // 只有 SELECT 才使用缓存
     boolean useCache = context.getBooleanAttribute("useCache", isSelect);
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
     // Include Fragments before parsing
+    // 处理 include 标签嵌套的 sql 片段
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
     includeParser.applyIncludes(context.getNode());
-
+    // 请求参数类型转换
     String parameterType = context.getStringAttribute("parameterType");
     Class<?> parameterTypeClass = resolveClass(parameterType);
 
@@ -92,9 +98,10 @@ public class XMLStatementBuilder extends BaseBuilder {
           configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
-
+    // 前面是能将xml节点解析,这里开始转成SQL
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
     StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+    // 游标
     Integer fetchSize = context.getIntAttribute("fetchSize");
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");

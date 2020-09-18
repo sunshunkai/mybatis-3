@@ -82,6 +82,7 @@ public class XMLScriptBuilder extends BaseBuilder {
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
         String data = child.getStringBody("");
         TextSqlNode textSqlNode = new TextSqlNode(data);
+        // 是否含有 ${ }
         if (textSqlNode.isDynamic()) {
           contents.add(textSqlNode);
           isDynamic = true;

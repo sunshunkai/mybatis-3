@@ -49,9 +49,11 @@ import org.apache.ibatis.type.JdbcType;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * 加载 config 文件
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
+  // 加载完就将标志位打开，不允许再次加载
   private boolean parsed;
   private final XPathParser parser;
   private String environment;
@@ -99,23 +101,40 @@ public class XMLConfigBuilder extends BaseBuilder {
     return configuration;
   }
 
+  /**
+   * 逐个解析配置文件
+   * @param root
+   */
   private void parseConfiguration(XNode root) {
     try {
       //issue #117 read properties first
       propertiesElement(root.evalNode("properties"));
+      // 提取并验证 settings 配置内容
       Properties settings = settingsAsProperties(root.evalNode("settings"));
+      // 加载vfsImpl，VFS含义是虚拟文件系统；主要是通过程序能够方便读取本地文件系统、FTP文件系统等系统中的文件资源
       loadCustomVfs(settings);
+      // 指定日志
       loadCustomLogImpl(settings);
+      // 别名
       typeAliasesElement(root.evalNode("typeAliases"));
+      // 插件加载
       pluginElement(root.evalNode("plugins"));
+      // 创建对象工厂
       objectFactoryElement(root.evalNode("objectFactory"));
+      // 包装对象工厂
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      // 反射工厂
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
+      // settings 的一些复杂配置
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      // 主要是事务工厂 和 数据源
       environmentsElement(root.evalNode("environments"));
+
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      // 注册 JAVA - JDBC 类型转换
       typeHandlerElement(root.evalNode("typeHandlers"));
+      // 解析mappers 应该是最重要的一个了
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -130,6 +149,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     // Check that all settings are known to the configuration class
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
+      // 检查setting中的配置是否正确
       if (!metaConfig.hasSetter(String.valueOf(key))) {
         throw new BuilderException("The setting " + key + " is not known.  Make sure you spelled it correctly (case sensitive).");
       }
@@ -159,15 +179,19 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void typeAliasesElement(XNode parent) {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // package 子标签
         if ("package".equals(child.getName())) {
+          // 获取包名,别名在POJO上的 Alias 注解
           String typeAliasPackage = child.getStringAttribute("name");
           configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
         } else {
           String alias = child.getStringAttribute("alias");
           String type = child.getStringAttribute("type");
           try {
+            // 根据 类 的全路径获取 Class
             Class<?> clazz = Resources.classForName(type);
             if (alias == null) {
+              // xml 里面没有配置别名的话回去注解里面寻找
               typeAliasRegistry.registerAlias(clazz);
             } else {
               typeAliasRegistry.registerAlias(alias, clazz);
@@ -183,9 +207,13 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void pluginElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // interceptor 是插件的全路径
         String interceptor = child.getStringAttribute("interceptor");
+        // 插件对应的属性
         Properties properties = child.getChildrenAsProperties();
+        // 实例化插件
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
+        // 属性赋值
         interceptorInstance.setProperties(properties);
         configuration.addInterceptor(interceptorInstance);
       }
@@ -221,8 +249,10 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void propertiesElement(XNode context) throws Exception {
     if (context != null) {
       Properties defaults = context.getChildrenAsProperties();
+      // 从 resource 或者 url 中读取配置文件，比如数据库连接参数
       String resource = context.getStringAttribute("resource");
       String url = context.getStringAttribute("url");
+      //  properties 属性只能有 resource 或者 url 中的一个,否则不知道从哪一个配置文件中读取
       if (resource != null && url != null) {
         throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
       }
@@ -364,20 +394,25 @@ public class XMLConfigBuilder extends BaseBuilder {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
+          // mapper 标签 可以是 mappers、 url、class 中的一个
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
           if (resource != null && url == null && mapperClass == null) {
+            // resource -> mapper.xml 文件路径
             ErrorContext.instance().resource(resource);
             InputStream inputStream = Resources.getResourceAsStream(resource);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
+            // 开始解析mapper.xml
             mapperParser.parse();
           } else if (resource == null && url != null && mapperClass == null) {
+            // url ->
             ErrorContext.instance().resource(url);
             InputStream inputStream = Resources.getUrlAsStream(url);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
             mapperParser.parse();
           } else if (resource == null && url == null && mapperClass != null) {
+            // mapperClass ->
             Class<?> mapperInterface = Resources.classForName(mapperClass);
             configuration.addMapper(mapperInterface);
           } else {

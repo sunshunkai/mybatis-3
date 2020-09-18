@@ -17,8 +17,14 @@ package org.apache.ibatis.parsing;
 
 /**
  * @author Clinton Begin
+ * 标记处理器
  */
 public interface TokenHandler {
+  /**
+   * 给定一个字符串,根据规则找到一个替换的字符串
+   * @param content
+   * @return
+   */
   String handleToken(String content);
 }
 

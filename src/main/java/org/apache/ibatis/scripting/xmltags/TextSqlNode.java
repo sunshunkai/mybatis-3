@@ -24,6 +24,7 @@ import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
  * @author Clinton Begin
+ * 相当于树叶，不再有子节点
  */
 public class TextSqlNode implements SqlNode {
   private final String text;
@@ -38,6 +39,10 @@ public class TextSqlNode implements SqlNode {
     this.injectionFilter = injectionFilter;
   }
 
+  /**
+   * 含有 ${} 为动态SQL
+   * @return
+   */
   public boolean isDynamic() {
     DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
     GenericTokenParser parser = createParser(checker);

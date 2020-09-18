@@ -56,6 +56,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private final XPathParser parser;
   private final MapperBuilderAssistant builderAssistant;
+  // SQL 片段
   private final Map<String, XNode> sqlFragments;
   private final String resource;
 
@@ -89,8 +90,12 @@ public class XMLMapperBuilder extends BaseBuilder {
     this.resource = resource;
   }
 
+  /**
+   * 解析Mapper.xml
+   */
   public void parse() {
     if (!configuration.isResourceLoaded(resource)) {
+      // 重点
       configurationElement(parser.evalNode("/mapper"));
       configuration.addLoadedResource(resource);
       bindMapperForNamespace();
@@ -114,9 +119,13 @@ public class XMLMapperBuilder extends BaseBuilder {
       builderAssistant.setCurrentNamespace(namespace);
       cacheRefElement(context.evalNode("cache-ref"));
       cacheElement(context.evalNode("cache"));
+      // parameterMap 元素解析
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+      // resultMap 元素解析
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+      // sql 片段解析
       sqlElement(context.evalNodes("/mapper/sql"));
+      // sql 语句
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
@@ -136,6 +145,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       try {
         statementParser.parseStatementNode();
       } catch (IncompleteElementException e) {
+        // 将暂时依赖其他标签的标签存储起来
         configuration.addIncompleteStatement(statementParser);
       }
     }
@@ -255,6 +265,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings, Class<?> enclosingType) throws Exception {
     ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
+    // 取值顺序 type -> ofType -> resultType -> javaType （对应实体的类型）
     String type = resultMapNode.getStringAttribute("type",
         resultMapNode.getStringAttribute("ofType",
             resultMapNode.getStringAttribute("resultType",
@@ -268,9 +279,11 @@ public class XMLMapperBuilder extends BaseBuilder {
     resultMappings.addAll(additionalResultMappings);
     List<XNode> resultChildren = resultMapNode.getChildren();
     for (XNode resultChild : resultChildren) {
+      // resultMap 中含有 constructor 构造方法
       if ("constructor".equals(resultChild.getName())) {
         processConstructorElement(resultChild, typeClass, resultMappings);
       } else if ("discriminator".equals(resultChild.getName())) {
+        // 鉴别器
         discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
       } else {
         List<ResultFlag> flags = new ArrayList<>();
@@ -336,6 +349,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private void sqlElement(List<XNode> list) {
+    // 如果标识多种数据库,SQL需要特殊处理
     if (configuration.getDatabaseId() != null) {
       sqlElement(list, configuration.getDatabaseId());
     }
