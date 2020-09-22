@@ -83,6 +83,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
         return connection.prepareStatement(sql, keyColumnNames);
       }
     } else if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
+      // 正在去数据库查询
       return connection.prepareStatement(sql);
     } else {
       return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);

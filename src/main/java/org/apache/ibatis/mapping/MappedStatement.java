@@ -32,9 +32,10 @@ import org.apache.ibatis.session.Configuration;
  * @author Clinton Begin
  */
 public final class MappedStatement {
-
+  // Mapper文件
   private String resource;
   private Configuration configuration;
+  // nameSpace + id
   private String id;
   private Integer fetchSize;
   private Integer timeout;

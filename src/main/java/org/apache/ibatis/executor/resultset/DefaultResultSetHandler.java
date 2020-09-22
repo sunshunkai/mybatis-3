@@ -185,10 +185,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     int resultSetCount = 0;
     ResultSetWrapper rsw = getFirstResultSet(stmt);
-
+    // 因为可能存在存储过程，返回多种结果集,一般查询只会返回一个结果集
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
     int resultMapCount = resultMaps.size();
     validateResultMapsCount(rsw, resultMapCount);
+    // 逐个结果集处理
     while (rsw != null && resultMapCount > resultSetCount) {
       ResultMap resultMap = resultMaps.get(resultSetCount);
       handleResultSet(rsw, resultMap, multipleResults, null);

@@ -30,6 +30,7 @@ import org.apache.ibatis.session.SqlSession;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * 将mapper接口生成实现类
  */
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
