@@ -299,6 +299,12 @@ public class Reflector {
     return methods.toArray(new Method[0]);
   }
 
+  /**
+   * 为每个方法生成唯一签名，并记录到uniqueMethods集合中
+   * key:方法签名
+   * @param uniqueMethods
+   * @param methods
+   */
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
       if (!currentMethod.isBridge()) {
@@ -313,15 +319,21 @@ public class Reflector {
     }
   }
 
+  /**
+   * 获取方法签名,eg:java.lang.String#getSignature:java.lang.reflect.Method
+   */
   private String getSignature(Method method) {
     StringBuilder sb = new StringBuilder();
     Class<?> returnType = method.getReturnType();
     if (returnType != null) {
+      // 返回值类型
       sb.append(returnType.getName()).append('#');
     }
+    // 方法名
     sb.append(method.getName());
     Class<?>[] parameters = method.getParameterTypes();
     for (int i = 0; i < parameters.length; i++) {
+      //  参数类型
       sb.append(i == 0 ? ':' : ',').append(parameters[i].getName());
     }
     return sb.toString();

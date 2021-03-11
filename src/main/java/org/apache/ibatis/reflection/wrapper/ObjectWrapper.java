@@ -26,8 +26,18 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  */
 public interface ObjectWrapper {
 
+  /**
+   * 获得指定属性的值
+   * @param prop
+   * @return
+   */
   Object get(PropertyTokenizer prop);
 
+  /**
+   * 设置指定属性的值
+   * @param prop
+   * @param value
+   */
   void set(PropertyTokenizer prop, Object value);
 
   String findProperty(String name, boolean useCamelCaseMapping);

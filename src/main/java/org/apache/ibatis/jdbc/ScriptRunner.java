@@ -39,14 +39,16 @@ public class ScriptRunner {
   private static final Pattern DELIMITER_PATTERN = Pattern.compile("^\\s*((--)|(//))?\\s*(//)?\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
 
   private final Connection connection;
-
+  // 遇到错误是否停止,false:不停止,true:停止
   private boolean stopOnError;
   private boolean throwWarning;
+  //
   private boolean autoCommit;
+  // true：获取整个脚本并执行，false：按照自定义的分隔符每行执行
   private boolean sendFullScript;
   private boolean removeCRs;
   private boolean escapeProcessing = true;
-
+  // 设置是否输出日志，null不输出日志，不设置自动将日志输出到控制台
   private PrintWriter logWriter = new PrintWriter(System.out);
   private PrintWriter errorLogWriter = new PrintWriter(System.err);
 

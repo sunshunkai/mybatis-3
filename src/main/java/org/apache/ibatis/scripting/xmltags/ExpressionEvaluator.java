@@ -28,6 +28,12 @@ import org.apache.ibatis.builder.BuilderException;
  */
 public class ExpressionEvaluator {
 
+  /**
+   * if 标签条件判断
+   * @param expression
+   * @param parameterObject
+   * @return
+   */
   public boolean evaluateBoolean(String expression, Object parameterObject) {
     Object value = OgnlCache.getValue(expression, parameterObject);
     if (value instanceof Boolean) {
